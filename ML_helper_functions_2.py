@@ -18,12 +18,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import accuracy_score
 
-def order_correlations(prediction_dict):
+def order_correlations(prediction_dict, bin_outcome1):
     '''Function to determine how correlated predictions are among classifiers.  Classifiers with high accuracy
     that are less correlated are better candidates for ensembling. This seems like inefficient code...
-    Note: this only works for pitch types "Fastball" and "Not_Fastball"
+    Note: this only works for binary categorical outcomes (name given in bin_outcome1)
     Input:
         predictions_dict: dictionary of predictions where key = classifier name and value = predictions
+        bin_outcome1: string containing the name of the categorical outcome of interest
     Output: returns nothing but prints a table listing correlation among predictions in decreasing order'''
     
     #Get a list of all the classifiers and initialize the list to store everything
@@ -35,8 +36,8 @@ def order_correlations(prediction_dict):
         classifier1 = classifiers[i]
         for j in range((i + 1), len(classifiers)):
             classifier2 = classifiers[j]
-            pred1 = np.where(prediction_dict[classifier1] == 'Fastball', 1, 0)
-            pred2 = np.where(prediction_dict[classifier2] == 'Fastball', 1, 0)
+            pred1 = np.where(prediction_dict[classifier1] == bin_outcome1, 1, 0)
+            pred2 = np.where(prediction_dict[classifier2] == bin_outcome1, 1, 0)
             correlation = pearsonr(pred1, pred2)
             corr_list.append([classifier1, classifier2, correlation])
             
@@ -157,7 +158,7 @@ def load_model(model_name, record_keeping_file = 'models/record_keeping.csv'):
     return joblib.load(model_fp)
 
 def naive_accuracy(data_dict):
-    '''Calculate the accuracy of just guessing the most common pitch, using the test data from the data dictionary'''
+    '''Calculate the accuracy of just guessing the most common label, using the test data from the data dictionary'''
 
     biggest_count = data_dict['test_targets'].value_counts()[0]
     all_counts = data_dict['test_targets'].value_counts().sum()
